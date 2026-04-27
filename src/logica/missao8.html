@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>PDV - Carrinho</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #1a1a2e;
+      color: white;
+      padding: 20px;
+    }
+    .card {
+      background: #16213e;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 500px;
+    }
+    .item {
+      background: #0f3460;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .total {
+      font-size: 24px;
+      color: #00ff88;
+      margin-top: 15px;
+    }
+    button {
+      padding: 8px 16px;
+      background: #e94560;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>PDV — Carrinho</h2>
+    <div id="listaCarrinho"></div>
+    <p class="total" id="total"></p>
+  </div>
+
+  <script>
+    let carrinho = [
+      { nome: "Sacola 25x35", preco: 4.50, quantidade: 3, subtotal: 13.50 },
+      { nome: "Copo 200ml",   preco: 8.90, quantidade: 2, subtotal: 17.80 },
+      { nome: "Garfo plastico", preco: 12.00, quantidade: 1, subtotal: 12.00 }
+    ]
+
+    function renderCarrinho() {
+      let lista = document.getElementById("listaCarrinho")
+      lista.innerHTML = ""
+
+      for (let item of carrinho) {
+        let div = document.createElement("div")
+        div.className = "item"
+        div.innerHTML = `
+          <span>${item.nome} x${item.quantidade}</span>
+          <span>R$ ${item.subtotal.toFixed(2)}</span>
+          <button onclick="remover('${item.nome}')">X</button>
+        `
+        lista.appendChild(div)
+      }
+
+      let total = carrinho.reduce((acc, item) => acc + item.subtotal, 0)
+      document.getElementById("total").textContent = "Total: R$ " + total.toFixed(2)
+    }
+
+    function remover(nome) {
+      carrinho = carrinho.filter(item => item.nome !== nome)
+      renderCarrinho()
+    }
+
+    renderCarrinho()
+  </script>
+</body>
+</html>

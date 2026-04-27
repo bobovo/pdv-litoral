@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Historico de Vendas</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #1a1a2e; color: white; padding: 20px; }
+    h2 { color: #00ff88; }
+    .venda { background: #16213e; padding: 15px; border-radius: 8px; margin-bottom: 16px; max-width: 600px; }
+    .venda-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+    .venda-id { font-size: 18px; font-weight: bold; color: #00ff88; }
+    .venda-total { font-size: 18px; color: #ffb830; }
+    .venda-data { font-size: 13px; color: #888; }
+    .item { background: #0f3460; padding: 8px 12px; border-radius: 4px; margin: 4px 0; display: flex; justify-content: space-between; font-size: 14px; }
+    .vazio { color: #666; font-size: 16px; }
+    a { color: #00ff88; text-decoration: none; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h2>Historico de Vendas</h2>
+  <a href="/pdv">← Voltar ao PDV</a>
+  <br><br>
+  <div id="lista"></div>
+
+  <script>
+    async function carregarHistorico() {
+      try {
+        var resposta = await fetch('/historico')
+        var vendas = await resposta.json()
+        var lista = document.getElementById('lista')
+
+        if (vendas.length === 0) {
+          lista.innerHTML = '<p class="vazio">Nenhuma venda registrada ainda.</p>'
+          return
+        }
+
+        vendas.forEach(function(venda) {
+          var div = document.createElement('div')
+          div.className = 'venda'
+
+          var itensHtml = venda.itens.map(function(item) {
+            return '<div class="item">' +
+              '<span>' + item.nome + ' x' + item.quantidade + '</span>' +
+              '<span>R$ ' + item.subtotal.toFixed(2) + '</span>' +
+            '</div>'
+          }).join('')
+
+          div.innerHTML =
+            '<div class="venda-header">' +
+              '<span class="venda-id">Venda #' + venda.id + '</span>' +
+              '<span class="venda-total">R$ ' + venda.total.toFixed(2) + '</span>' +
+            '</div>' +
+            '<div class="venda-data">' + venda.forma_pag + ' — ' + venda.data_hora + '</div>' +
+            '<br>' + itensHtml
+
+          lista.appendChild(div)
+        })
+      } catch(e) {
+        document.getElementById('lista').innerHTML = '<p class="vazio">Erro ao carregar historico.</p>'
+      }
+    }
+
+    carregarHistorico()
+  </script>
+</body>
+</html>

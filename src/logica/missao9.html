@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>PDV Litoral SC</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #1a1a2e; color: white; padding: 20px; }
+    .card { background: #16213e; padding: 20px; border-radius: 8px; max-width: 500px; }
+    .item { background: #0f3460; padding: 10px; margin: 8px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+    .total { font-size: 24px; color: #00ff88; margin-top: 15px; }
+    select { padding: 10px; font-size: 14px; border-radius: 4px; border: none; margin: 4px 0; width: 100%; }
+    input { padding: 10px; font-size: 14px; border-radius: 4px; border: none; margin: 4px 0; width: 100%; }
+    button { padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    .btn-add { background: #00ff88; color: #1a1a2e; width: 100%; margin-top: 8px; font-weight: bold; }
+    .btn-fin { background: #0f3460; color: white; width: 100%; margin-top: 8px; font-size: 16px; }
+    .btn-rem { background: #e94560; color: white; padding: 6px 12px; }
+    .erro { color: #ff4444; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>PDV — Loja Embalagens</h2>
+
+    <select id="listaProdutos">
+      <option value="">Selecione um produto</option>
+    </select>
+    <input type="number" id="quantidade" placeholder="Quantidade">
+    <button class="btn-add" onclick="adicionar()">+ Adicionar</button>
+    <p class="erro" id="erro"></p>
+
+    <div id="listaCarrinho"></div>
+    <p class="total" id="total"></p>
+
+    <button class="btn-fin" onclick="finalizarVenda()">✅ Finalizar Venda</button>
+    <a href="/historico-html" style="display:block; text-align:center; margin-top:10px; color:#888; font-size:13px;">Ver historico de vendas →</a>
+    <a href="/produtos-html" style="display:block; text-align:center; margin-top:6px; color:#888; font-size:13px;">Gerenciar produtos →</a>
+    <p id="msgFinal" style="font-size:16px; margin-top:10px;"></p>
+  </div>
+
+  <script>
+    var carrinho = []
+
+    async function buscarProdutos() {
+      try {
+        var resposta = await fetch('/produtos')
+        var produtos = await resposta.json()
+        produtos.forEach(function(produto) {
+          var option = document.createElement('option')
+          option.value = JSON.stringify(produto)
+          option.textContent = produto.nome + ' — R$ ' + produto.preco.toFixed(2)
+          document.getElementById('listaProdutos').appendChild(option)
+        })
+      } catch(e) {
+        console.log('Erro ao buscar produtos:', e)
+      }
+    }
+
+    buscarProdutos()
+
+    function adicionar() {
+      var select = document.getElementById('listaProdutos')
+      if (!select.value) {
+        document.getElementById('erro').textContent = 'Selecione um produto!'
+        return
+      }
+      var produto = JSON.parse(select.value)
+      var quantidade = parseInt(document.getElementById('quantidade').value)
+
+      if (isNaN(quantidade) || quantidade <= 0) {
+        document.getElementById('erro').textContent = 'Digite a quantidade!'
+        return
+      }
+
+      carrinho.push({
+        id: produto.id,
+        nome: produto.nome,
+        preco: produto.preco,
+        quantidade: quantidade,
+        subtotal: produto.preco * quantidade
+      })
+
+      document.getElementById('erro').textContent = ''
+      document.getElementById('quantidade').value = ''
+      renderCarrinho()
+    }
+
+    function remover(index) {
+      carrinho.splice(index, 1)
+      renderCarrinho()
+    }
+
+    function renderCarrinho() {
+      var lista = document.getElementById('listaCarrinho')
+      lista.innerHTML = ''
+
+      for (var i = 0; i < carrinho.length; i++) {
+        var item = carrinho[i]
+        var div = document.createElement('div')
+        div.className = 'item'
+        div.innerHTML =
+          '<span>' + item.nome + ' x' + item.quantidade + '</span>' +
+          '<span>R$ ' + item.subtotal.toFixed(2) + '</span>' +
+          '<button class="btn-rem" onclick="remover(' + i + ')">X</button>'
+        lista.appendChild(div)
+      }
+
+      var total = carrinho.reduce(function(acc, item) { return acc + item.subtotal }, 0)
+      document.getElementById('total').textContent = carrinho.length > 0 ? 'Total: R$ ' + total.toFixed(2) : ''
+    }
+
+    async function finalizarVenda() {
+      if (carrinho.length === 0) {
+        document.getElementById('msgFinal').textContent = 'Carrinho vazio!'
+        document.getElementById('msgFinal').style.color = '#ff4444'
+        return
+      }
+
+      var total = carrinho.reduce(function(acc, item) { return acc + item.subtotal }, 0)
+      var agora = new Date()
+
+      var venda = {
+        total: total,
+        forma_pag: 'dinheiro',
+        data_hora: agora.toLocaleString('pt-BR'),
+        itens: carrinho
+      }
+
+      try {
+        var resposta = await fetch('/vendas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(venda)
+        })
+        var resultado = await resposta.json()
+
+        document.getElementById('msgFinal').style.color = '#00ff88'
+        document.getElementById('msgFinal').textContent =
+          'Venda #' + resultado.venda_id + ' salva! R$ ' + total.toFixed(2) + ' — ' + agora.toLocaleTimeString('pt-BR')
+
+        carrinho = []
+        renderCarrinho()
+      } catch(e) {
+        document.getElementById('msgFinal').textContent = 'Erro ao salvar venda!'
+        document.getElementById('msgFinal').style.color = '#ff4444'
+      }
+    }
+  </script>
+</body>
+</html>

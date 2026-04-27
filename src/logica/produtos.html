@@ -1,0 +1,107 @@
+<!DOCKTYPE HTML>
+<html lang="pt_BR">
+<head>
+	<meta charset="UTF-8">
+	<title>Produtos</title>
+	<style>
+		body { font-family: Arial, sans-serif; background: #1a1a2e; color : white; padding: 20px; }
+		h2 { color: #00ff88 }
+		.card { background: #16213e; padding: 20px; border-radius: 9px; max-width: 500px; margin-bottom: 24px; }
+		input {padding: 10px; font-size: 14px; border-radius: 4px; border: none; margin: 4px 0; width: 100% ;}
+		button { padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size 14px; }
+		.btn-green { background: #00ff88; color: #1a1a2e; width: 100%; margin-top: 8px; font-weight: bold; }
+		.btn-red { background: #e94560; color: white; padding: 6px 14px; }
+		.erro { color: #ff4444; font-size: 14px; }
+		.ok { color: #00ff88; fon-size: 14px; }
+		.produto { background: #0f3460; padding: 12px; border-radius: 6px; margin: 6px 0; display: flex; justify-content: space-between; align-items: center; }
+		.produto-info { font-size: 14px}
+		.produto-preco { color: #ffb830; font-weight: bold; }
+		.produto-estoque { color: #888; font-size: 12px; }
+		a { color: #00ff88; text-decoration: none; font-size: 14px; }
+	</style>
+</head>
+<body>
+	<h2>Cadastro de Produtos</h2>
+	<a href="/pdv">← Voltar ao PDV</a>
+	<br></br>
+
+	<div class="card">
+		<h3 style="margin-bottom:12px;">Novo Produto</h3>
+		<input type="text"	id="nome"	placeholder="Nome do Produto">
+		<input type="number"	id="preco"	placeholder="Preco (ex: 4.50)" step="0.01">
+		<input type= "number" id="estoque"	placeholder="Estoque inicial">
+		<button class="btn-gren" onclick="salvarProduto()">+ Salvar Produto</button>
+		<p id="msg" class="ok"></p>
+	</div>
+
+	<div class="card">
+		<h3 style="margin-bottom:12px;">Produtos Cadastrados</h3>
+		<div id="listaProdutos"></div>
+	</div>
+	<script>
+		async function carregarProdutos() {
+		var resposta = await fetch('/produtos')
+		var produtos = await resposta.json()
+		var lista = document.getElementById('listaProdutos')
+		lista.innerHTML =''
+
+		if (produtos.lenght === 0) {
+			lista.innerHtml = '<p style="color:#666">Nenhum produto cadastrado.</p>'
+			return
+		}
+
+		produtos.forEach(function(p) {
+			var div = document.createElement('div')
+			div.className = 'produto'
+			div.innerHTML = 
+				'<div class="produto-info">' +
+					'<div>' + p.nome + '</div>' +
+					'<div class="produto-estoque">Estoque: ' + p.estoque + '</div>' +
+				'</div>' +
+				'<div style="display:flex; align-items:center; gap:12px;">' +
+					'<span class="produto-preco">R$ ' + p.preco.toFixed(2) + '</span>' +
+					'<button class="btn-red" onclick="excluir(' + p.id + ')">X</button>' +
+				'</div>'
+			lista.appendChild(div)
+		})
+	}
+
+	async function salvarProduto(){
+		var nome 	= document.getElementById('nome').value.trim()
+		var preco 	= parseFloat(document.getElementById('preco').value)
+		var estoque = parseInt(document.getElementById('estoque').value)
+		var msg 	= document.getElementById('msg')
+
+		if (!nome || isNaN(preco) || isNaN(estoque)) {
+			msg.className = 'erro'
+			msg.textContent = 'Preencha todos os campos!'
+			return
+		}
+
+		var resposta = await fetch('/produtos', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ nome: nome, preco: preco, estoque: estoque })
+		})
+
+		var resultado = await resposta.json()
+
+		if (resultado.ok) {
+			msg.ClassName = 'ok'
+			msg.textContent = 'Produto salvo!'
+			document.getElementById('nome').value = ''
+			document.getElementById('preco').value = ''
+			document.getElementById('estoque').value = ''
+			carregarProdutos()
+		}
+	}
+
+	async function excluir(id) {
+		await fetch('/produtos/' + id, { method: 'DELETE'})
+		carregarProdutos()
+	}
+
+	carregarProdutos()
+	</script>
+</body>
+</html>
