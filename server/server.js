@@ -19,7 +19,7 @@ criarBanco().then(function(banco) {
     }
 
     if (req.url === '/produtos-html') {
-      var prodHtmlPath = path.join(__dirname, '../src/logica/produtos.html')
+      var prodHtmlPath = path.join(__dirname, '../src/pdv/produtos.html')
       var prodHtml = fs.readFileSync(prodHtmlPath)
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8'})
       res.end(prodHtml)
@@ -52,7 +52,7 @@ criarBanco().then(function(banco) {
     }
 
     if (req.url === '/historico-html') {
-      var histPath = path.join(__dirname, '../src/logica/historico.html')
+      var histPath = path.join(__dirname, '../src/pdv/historico.html')
       var histHtml = fs.readFileSync(histPath)
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
       res.end(histHtml)
@@ -75,7 +75,7 @@ criarBanco().then(function(banco) {
     }
 
     if (req.url === '/' || req.url === '/pdv') {
-      var htmlPath = path.join(__dirname, '../src/logica/missao9.html')
+      var htmlPath = path.join(__dirname, '../src/pdv/index.html')
       var html = fs.readFileSync(htmlPath)
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
       res.end(html)

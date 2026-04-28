@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>PDV - Adicionar Item</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #1a1a2e; color: white; padding: 20px; }
+    .card { background: #16213e; padding: 20px; border-radius: 8px; max-width: 500px; }
+    .item { background: #0f3460; padding: 10px; margin: 8px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+    .total { font-size: 24px; color: #00ff88; margin-top: 15px; }
+    input { padding: 10px; font-size: 14px; border-radius: 4px; border: none; margin: 4px 0; width: 100%; }
+    button { padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    .btn-add { background: #00ff88; color: #1a1a2e; width: 100%; margin-top: 8px; font-weight: bold; }
+    .btn-rem { background: #e94560; color: white; padding: 6px 12px; }
+    .erro { color: #ff4444; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>PDV — Loja Embalagens</h2>
+
+    <input type="text"   id="nome"       placeholder="Nome do produto">
+    <input type="number" id="preco"      placeholder="Preço unitário">
+    <input type="number" id="quantidade" placeholder="Quantidade">
+    <button class="btn-add" onclick="adicionar()">+ Adicionar</button>
+    <p class="erro" id="erro"></p>
+
+    <div id="listaCarrinho"></div>
+    <p class="total" id="total"></p>
+  </div>
+
+  <script>
+    let carrinho = []
+
+    function adicionar() {
+      let nome       = document.getElementById("nome").value.trim()
+      let preco      = parseFloat(document.getElementById("preco").value)
+      let quantidade = parseInt(document.getElementById("quantidade").value)
+
+      if (!nome || isNaN(preco) || isNaN(quantidade)) {
+        document.getElementById("erro").textContent = "Preencha todos os campos!"
+        return
+      }
+
+      let item = {
+        nome: nome,
+        preco: preco,
+        quantidade: quantidade,
+        subtotal: preco * quantidade
+      }
+
+      carrinho.push(item)
+      document.getElementById("erro").textContent = ""
+      document.getElementById("nome").value = ""
+      document.getElementById("preco").value = ""
+      document.getElementById("quantidade").value = ""
+
+      renderCarrinho()
+    }
+
+    function remover(index) {
+      carrinho.splice(index, 1)
+      renderCarrinho()
+    }
+
+    function renderCarrinho() {
+      let lista = document.getElementById("listaCarrinho")
+      lista.innerHTML = ""
+
+      for (let i = 0; i < carrinho.length; i++) {
+        let item = carrinho[i]
+        let div = document.createElement("div")
+        div.className = "item"
+        div.innerHTML = `
+          <span>${item.nome} x${item.quantidade}</span>
+          <span>R$ ${item.subtotal.toFixed(2)}</span>
+          <button class="btn-rem" onclick="remover(${i})">X</button>
+        `
+        lista.appendChild(div)
+      }
+
+      let total = carrinho.reduce((acc, item) => acc + item.subtotal, 0)
+      document.getElementById("total").textContent = carrinho.length > 0 ? "Total: R$ " + total.toFixed(2) : ""
+    }
+  </script>
+</body>
+</html>
