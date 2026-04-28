@@ -31,6 +31,7 @@
     <div id="listaCarrinho"></div>
     <p class="total" id="total"></p>
 
+    <div id="avisoBaixo" style="display:none; background:#3d0000; color:#ff4444; padding:10px; border-radiux:6px; margin-top:10px; font-size:13px;"></div>
     <button class="btn-fin" onclick="finalizarVenda()">✅ Finalizar Venda</button>
     <a href="/historico-html" style="display:block; text-align:center; margin-top:10px; color:#888; font-size:13px;">Ver historico de vendas →</a>
     <a href="/produtos-html" style="display:block; text-align:center; margin-top:6px; color:#888; font-size:13px;">Gerenciar produtos →</a>
@@ -39,6 +40,19 @@
 
   <script>
     var carrinho = []
+
+    async function verificarEstoqueBaixo() {
+      var resposta = await fetch('/produtos')
+      var produtos = await resposta.json()
+      var baixos = produtos.filter(function(p) { return p.estoque < 10 })
+
+      if (baixos.length > 0) {
+        var nomes = baixos.map(function(p) { return p.nome + '(' + p.estoque + ')' }).join(', ')
+        var aviso = document.getElementById('avisoBaixo')
+        aviso.textContent = '⚠️ Estoque baixo: ' + nomes
+        aviso.style.display = 'block'
+      }
+    }
 
     async function buscarProdutos() {
       try {
@@ -56,6 +70,8 @@
     }
 
     buscarProdutos()
+
+    verificarEstoqueBaixo()
 
     function adicionar() {
       var select = document.getElementById('listaProdutos')
