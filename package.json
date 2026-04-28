@@ -1,7 +1,7 @@
 {
   "name": "pdv-litoral",
   "version": "1.0.0",
-  "description": "",
+  "description": "Sistema de ponto de venda (PDV) offline desenvolvido para pequenos comércios.",
   "main": "index.js",
   "dependencies": {
     "sql.js": "^1.5.0"
@@ -11,6 +11,14 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "author": "bob",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bobovo/pdv-litoral.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bobovo/pdv-litoral/issues"
+  },
+  "homepage": "https://github.com/bobovo/pdv-litoral#readme"
 }
