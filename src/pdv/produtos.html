@@ -56,8 +56,8 @@
 			div.innerHTML = 
 				'<div class="produto-info">' +
 					'<div>' + p.nome + '</div>' +
-					'<div class="produto-estoque">Estoque: ' + p.estoque + '</div>' +
-				'</div>' +
+					'<div class="produto-estoque" style="color:' + (p.estoque < 10 ? '#ff4444' : '#888') + '">' + (p.estoque < 10 ? '⚠️ ' : '') + 'Estoque: ' + p.estoque +
+					'</div>'
 				'<div style="display:flex; align-items:center; gap:12px;">' +
 					'<span class="produto-preco">R$ ' + p.preco.toFixed(2) + '</span>' +
 					'<button class="btn-red" onclick="excluir(' + p.id + ')">X</button>' +
